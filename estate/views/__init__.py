@@ -1,0 +1,2 @@
+from . import estate_property_views, estate_property_type_views, estate_menu_views,
+estate_property_type_views
