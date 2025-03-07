@@ -2,13 +2,17 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models, api
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from . import estate_property_type
 
 
 class EstateProperty(models.Model):
     _name = 'estate.property'
     _description = 'Real estate property'
+    _sql_constraints = [
+        ('check_expected_price', 'CHECK(expected_price > 0)', 'The expected price must be strictly positive'),
+        ('check_selling_price', 'CHECK(selling_price >= 0)', 'The selling price must be positive'),
+    ]
 
     active = fields.Boolean(default=True)
     name = fields.Char(required=True)
@@ -88,3 +92,9 @@ class EstateProperty(models.Model):
                     record.state = 'cancelled'
                 return True
         raise UserError(message="Cannot cancel a sold property")
+
+    @api.constrains('selling_price', 'expected_price')
+    def _check_selling_price(self):
+        for record in self:
+            if record.selling_price < 0.9 * record.expected_price:
+                raise ValidationError('Selling price cannot be lower than 90% of expected price')

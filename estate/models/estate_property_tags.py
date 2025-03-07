@@ -6,5 +6,8 @@ from odoo import fields, models
 class EstateTags(models.Model):
     _name = 'estate.property.tags'
     _description = 'Tags for properties'
+    _sql_constraints = [
+        ('check_tag_is_unique', 'UNIQUE(name)', 'Tag names must be unique')
+    ]
 
     name = fields.Char(required=True)
