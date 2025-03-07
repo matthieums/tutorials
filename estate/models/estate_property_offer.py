@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import fields, models, api
+from odoo.exceptions import UserError
 
 
 class Offer(models.Model):
@@ -33,4 +34,18 @@ class Offer(models.Model):
             create_date = fields.Datetime.from_string(record.create_date)
             delta = deadline_date - create_date.date()
             record.validity = delta.days
-    
+
+    def action_accept_offer(self):
+        for record in self:
+            if record.property_id.state == 'offer accepted':
+                raise UserError('An offer was already accepted')
+            record.status = 'accepted'
+            record.property_id.state = 'offer accepted'
+            record.property_id.buyer_id = record.partner_id
+            record.property_id.selling_price = record.price
+            return True
+
+    def action_refuse_offer(self):
+        for record in self:
+            record.status = 'refused'
+        return True

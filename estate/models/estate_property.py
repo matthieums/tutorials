@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api, exceptions
+from odoo import fields, models, api
+from odoo.exceptions import UserError
 from . import estate_property_type
 
 
@@ -72,4 +73,18 @@ class EstateProperty(models.Model):
             self.garden_area = 0
             self.garden_orientation = False
 
+    def action_sell_property(self):
+        for record in self:
+            if record.state != 'cancelled':
+                for record in self:
+                    record.state = 'sold'
+                return True
+        raise UserError(message="Cannot sell a cancelled property")
 
+    def action_cancel_property(self):
+        for record in self:
+            if record.state != 'sold':
+                for record in self:
+                    record.state = 'cancelled'
+                return True
+        raise UserError(message="Cannot cancel a sold property")
